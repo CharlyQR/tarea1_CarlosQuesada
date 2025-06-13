@@ -1,9 +1,8 @@
 package com.project.demo.logic.entity.categoria;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import org.springframework.data.annotation.Id;
+import jakarta.persistence.*;
 
+@Entity
 public class Categoria {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

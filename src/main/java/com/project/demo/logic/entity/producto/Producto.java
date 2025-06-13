@@ -3,6 +3,7 @@ package com.project.demo.logic.entity.producto;
 import com.project.demo.logic.entity.categoria.Categoria;
 import jakarta.persistence.*;
 
+@Entity
 public class Producto {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
