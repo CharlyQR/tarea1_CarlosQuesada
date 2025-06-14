@@ -79,11 +79,15 @@ public class ProductoRestController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
-   public ResponseEntity<?>  createProduct(@RequestBody Producto producto, HttpServletRequest request) {
-        Producto savedProduct =  productoRepository.save(producto);
-        return new GlobalResponseHandler().handleResponse(
-                "Producto guardado correctamente",
-                savedProduct, HttpStatus.CREATED, request
+    public ResponseEntity<?> createProduct(@RequestBody Producto producto, HttpServletRequest request) {
+        if (producto.getCategoria() == null || producto.getCategoria().getId() == null || !categoriaRepository.existsById(producto.getCategoria().getId())) {
+            return new GlobalResponseHandler().handleResponse("El id ingresado de la categoría, no existe en la Base de Datos",
+                    HttpStatus.BAD_REQUEST, request
+                    );
+        }
+        productoRepository.save(producto);
+        return new GlobalResponseHandler().handleResponse("Producto guardado correctamente.",
+                producto, HttpStatus.CREATED, request
         );
     }
 
