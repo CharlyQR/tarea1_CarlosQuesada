@@ -49,12 +49,6 @@ public class ProductoRestController {
     @PostMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
    public ResponseEntity<?>  createProduct(@RequestBody Producto producto, HttpServletRequest request) {
-        if (!categoriaRepository.existsById(producto.getCategoria().getId())) {
-            return new GlobalResponseHandler().handleResponse(
-                    "El ID ingresado es invalido",
-                    HttpStatus.BAD_REQUEST, request
-            );
-        }
         Producto savedProduct =  productoRepository.save(producto);
         return new GlobalResponseHandler().handleResponse(
                 "Producto guardado correctamente",
@@ -62,17 +56,17 @@ public class ProductoRestController {
         );
     }
 
+    @DeleteMapping("/{productoId}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteProduct(@PathVariable Long id, HttpServletRequest request) {
-        Optional<Producto> foundProduct = productoRepository.findById(id);
+    public ResponseEntity<?> deleteProduct(@PathVariable Long productoId, HttpServletRequest request) {
+        Optional<Producto> foundProduct = productoRepository.findById(productoId);
         if (foundProduct.isPresent()) {
-            productoRepository.deleteById(id);
-            return new GlobalResponseHandler().handleResponse("Producto eliminado correctamente",
+            productoRepository.deleteById(productoId);
+            return new GlobalResponseHandler().handleResponse("Producto eliminado correctamente.",
                     foundProduct, HttpStatus.OK, request
             );
         } else {
-            return new GlobalResponseHandler().handleResponse("El producto con id: " + id + ", no fue encontrado" ,
+            return new GlobalResponseHandler().handleResponse("El producto con id: " + productoId + ", no fue encontrado." ,
                     HttpStatus.NOT_FOUND, request);
         }
     }
