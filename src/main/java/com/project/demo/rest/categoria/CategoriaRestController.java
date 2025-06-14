@@ -3,16 +3,12 @@ package com.project.demo.rest.categoria;
 import com.project.demo.logic.entity.categoria.Categoria;
 import com.project.demo.logic.entity.categoria.CategoriaRepository;
 import com.project.demo.logic.entity.http.GlobalResponseHandler;
-import com.project.demo.logic.entity.producto.ProductoRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -21,8 +17,6 @@ public class CategoriaRestController {
 
     @Autowired
     private CategoriaRepository categoriaRepository;
-    @Autowired
-    private ProductoRepository productoRepository;
 
     @GetMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'USER')")

@@ -22,6 +22,7 @@ public class ProductoRestController {
     @Autowired
     private CategoriaRepository categoriaRepository;
 
+
     @GetMapping
     public ResponseEntity<?> getAllProducts(HttpServletRequest request) {
         return new GlobalResponseHandler().handleResponse(
@@ -43,6 +44,36 @@ public class ProductoRestController {
         } else {
             return new GlobalResponseHandler().handleResponse("El producto con id: " + productoId + ", no existe",
                     HttpStatus.NOT_FOUND, request);
+        }
+    }
+
+    @PatchMapping("/{productoId}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
+    public ResponseEntity<?> patchProducto(@PathVariable Long productoId, @RequestBody Producto producto, HttpServletRequest request) {
+        Optional<Producto> foundProduct = productoRepository.findById(productoId);
+        if (foundProduct.isPresent()) {
+            if (producto.getNombre() != null) foundProduct.get().setNombre(producto.getNombre());
+            if (producto.getDescripcion() != null) foundProduct.get().setDescripcion(producto.getDescripcion());
+            if (producto.getPrecio() != null)  foundProduct.get().setPrecio(producto.getPrecio());
+
+            if (producto.getCategoria() != null && producto.getCategoria().getId() != null) {
+                if (categoriaRepository.existsById(producto.getCategoria().getId())) {
+                    if (producto.getCategoria() != null) foundProduct.get().setCategoria(producto.getCategoria());
+                } else {
+                    return new GlobalResponseHandler().handleResponse(
+                            "El id ingresado de la Categoría, no existe en la Base de Datos",
+                            HttpStatus.BAD_REQUEST, request
+                    );
+                }
+            }
+            productoRepository.save(foundProduct.get());
+            return new GlobalResponseHandler().handleResponse("Producto actualizado correctamente",
+                    foundProduct.get(), HttpStatus.OK, request
+            );
+        } else {
+            return new GlobalResponseHandler().handleResponse("El producto con el id: " + productoId + ", no fue encontrado",
+                    HttpStatus.NOT_FOUND, request
+            );
         }
     }
 

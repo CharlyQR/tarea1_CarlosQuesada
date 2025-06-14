@@ -11,7 +11,7 @@ public class Producto {
 
     private String nombre;
     private String descripcion;
-    private double precio;
+    private Double precio;
 
     @Column(name = "cantidadStock")
     private Integer cantidadStock;
@@ -45,7 +45,7 @@ public class Producto {
         this.descripcion = descripcion;
     }
 
-    public double getPrecio() {
+    public Double getPrecio() {
         return precio;
     }
 
