@@ -37,10 +37,16 @@ public class ProductoRestController {
     public ResponseEntity<?> updateProducto(@PathVariable Long productoId, @RequestBody Producto producto, HttpServletRequest request) {
         Optional<Producto> foundProduct = productoRepository.findById(productoId);
         if (foundProduct.isPresent()) {
+            if (producto.getCategoria() == null || producto.getCategoria().getId() == null || !categoriaRepository.existsById(producto.getCategoria().getId())) {
+                return new GlobalResponseHandler().handleResponse("El id ingresado de la Categoría, no existe en la Base de Datos",
+                        HttpStatus.BAD_REQUEST, request
+                );
+            }
             producto.setId(foundProduct.get().getId());
             productoRepository.save(producto);
-            return new GlobalResponseHandler().handleResponse("Producto actualizado correctamente",
-                    producto, HttpStatus.OK, request);
+            return new GlobalResponseHandler().handleResponse("Producto actualizado correctamente.",
+                    producto, HttpStatus.OK, request
+            );
         } else {
             return new GlobalResponseHandler().handleResponse("El producto con id: " + productoId + ", no existe",
                     HttpStatus.NOT_FOUND, request);
