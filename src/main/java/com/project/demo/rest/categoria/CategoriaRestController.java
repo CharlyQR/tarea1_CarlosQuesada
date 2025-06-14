@@ -55,7 +55,7 @@ public class CategoriaRestController {
                     foundCategoria.get(), HttpStatus.OK, request
             );
         } else {
-            return new GlobalResponseHandler().handleResponse("La catgoría con el id: " + categoriaId + ", no existe en la Base de Datos.",
+            return new GlobalResponseHandler().handleResponse("La categoría con el id: " + categoriaId + ", no existe en la Base de Datos.",
                     HttpStatus.NOT_FOUND, request
             );
         }
