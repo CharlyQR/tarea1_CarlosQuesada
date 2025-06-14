@@ -21,7 +21,7 @@ public class CategoriaRestController {
         return categoriaRepository.findAll();
     }
 
-    @PutMapping
+    @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
     public Categoria updateCategoria(@PathVariable Long id, @RequestBody Categoria categoria) {
         return categoriaRepository.findById(id)
