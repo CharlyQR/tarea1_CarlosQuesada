@@ -3,10 +3,13 @@ package com.project.demo.rest.categoria;
 import com.project.demo.logic.entity.categoria.Categoria;
 import com.project.demo.logic.entity.categoria.CategoriaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/categorias")
@@ -45,6 +48,11 @@ public class CategoriaRestController {
     @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
     @DeleteMapping("/{id}")
     public void deleteCategoria(@PathVariable Long id) {
-        categoriaRepository.deleteById(id);
+       if (categoriaRepository.existsById(id)) {
+            categoriaRepository.deleteById(id);
+           System.out.println("La categoría " + id + " ha sido eliminada correctamente");
+       } else {
+           System.out.println("No se encontró la categoría " + id);
+       }
     }
 }

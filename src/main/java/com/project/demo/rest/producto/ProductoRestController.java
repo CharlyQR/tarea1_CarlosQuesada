@@ -1,12 +1,17 @@
 package com.project.demo.rest.producto;
 
+import com.project.demo.logic.entity.categoria.CategoriaRepository;
+import com.project.demo.logic.entity.http.GlobalResponseHandler;
 import com.project.demo.logic.entity.producto.Producto;
 import com.project.demo.logic.entity.producto.ProductoRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/productos")
@@ -14,39 +19,61 @@ public class ProductoRestController {
     @Autowired
     private ProductoRepository productoRepository;
 
+    @Autowired
+    private CategoriaRepository categoriaRepository;
+
     @GetMapping
-    @PreAuthorize("hasAnyRole('USER','SUPER_ADMIN')")
-    public List<Producto> getAllProducts() {
-        return productoRepository.findAll();
+    public ResponseEntity<?> getAllProducts(HttpServletRequest request) {
+        return new GlobalResponseHandler().handleResponse(
+                "Productos Guardados: ",
+                productoRepository.findAll(),
+                HttpStatus.OK, request
+        );
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{productoId}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
-    public Producto updateProduct(@PathVariable Long id, @RequestBody Producto producto) {
-        return productoRepository.findById(id)
-                .map(existingProduct -> {
-                    existingProduct.setNombre(producto.getNombre());
-                    existingProduct.setDescripcion(producto.getDescripcion());
-                    existingProduct.setPrecio(producto.getPrecio());
-                    existingProduct.setCantidadStock(producto.getCantidadStock());
-                    existingProduct.setCategoria(producto.getCategoria());
-                    return productoRepository.save(existingProduct);
-                })
-                .orElseGet(() -> {
-                    producto.setId(id);
-                    return productoRepository.save(producto);
-                });
+    public ResponseEntity<?> updateProducto(@PathVariable Long productoId, @RequestBody Producto producto, HttpServletRequest request) {
+        Optional<Producto> foundProduct = productoRepository.findById(productoId);
+        if (foundProduct.isPresent()) {
+            producto.setId(foundProduct.get().getId());
+            productoRepository.save(producto);
+            return new GlobalResponseHandler().handleResponse("Producto actualizado correctamente",
+                    producto, HttpStatus.OK, request);
+        } else {
+            return new GlobalResponseHandler().handleResponse("El producto con id: " + productoId + ", no existe",
+                    HttpStatus.NOT_FOUND, request);
+        }
     }
 
     @PostMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
-    public Producto addProduct(@RequestBody Producto producto) {
-        return productoRepository.save(producto);
+   public ResponseEntity<?>  createProduct(@RequestBody Producto producto, HttpServletRequest request) {
+        if (!categoriaRepository.existsById(producto.getCategoria().getId())) {
+            return new GlobalResponseHandler().handleResponse(
+                    "El ID ingresado es invalido",
+                    HttpStatus.BAD_REQUEST, request
+            );
+        }
+        Producto savedProduct =  productoRepository.save(producto);
+        return new GlobalResponseHandler().handleResponse(
+                "Producto guardado correctamente",
+                savedProduct, HttpStatus.CREATED, request
+        );
     }
 
     @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
     @DeleteMapping("/{id}")
-    public void deleteProduct(@PathVariable Long id) {
-        productoRepository.deleteById(id);
+    public ResponseEntity<?> deleteProduct(@PathVariable Long id, HttpServletRequest request) {
+        Optional<Producto> foundProduct = productoRepository.findById(id);
+        if (foundProduct.isPresent()) {
+            productoRepository.deleteById(id);
+            return new GlobalResponseHandler().handleResponse("Producto eliminado correctamente",
+                    foundProduct, HttpStatus.OK, request
+            );
+        } else {
+            return new GlobalResponseHandler().handleResponse("El producto con id: " + id + ", no fue encontrado" ,
+                    HttpStatus.NOT_FOUND, request);
+        }
     }
 }
