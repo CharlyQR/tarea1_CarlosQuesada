@@ -43,6 +43,24 @@ public class CategoriaRestController {
         }
     }
 
+    @PatchMapping("/{categoriaId}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
+    public ResponseEntity<?> patchCategoria(@PathVariable Long categoriaId, @RequestBody Categoria categoria, HttpServletRequest request) {
+        Optional<Categoria> foundCategoria = categoriaRepository.findById(categoriaId);
+        if (foundCategoria.isPresent()) {
+            if (categoria.getNombre() != null) foundCategoria.get().setNombre(categoria.getNombre());
+            if (categoria.getDescripcion() != null) foundCategoria.get().setDescripcion(categoria.getDescripcion());
+            categoriaRepository.save(foundCategoria.get());
+            return new GlobalResponseHandler().handleResponse("Categoría actualizada correctamente.",
+                    foundCategoria.get(), HttpStatus.OK, request
+            );
+        } else {
+            return new GlobalResponseHandler().handleResponse("La catgoría con el id: " + categoriaId + ", no existe en la Base de Datos.",
+                    HttpStatus.NOT_FOUND, request
+            );
+        }
+    }
+
     @PostMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
     public ResponseEntity<?> createCategoria(@RequestBody Categoria categoria, HttpServletRequest request) {
