@@ -15,15 +15,9 @@ import java.util.Optional;
 public class AdminSeeder implements ApplicationListener<ContextRefreshedEvent> {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
-
     private final PasswordEncoder passwordEncoder;
 
-
-    public AdminSeeder(
-            RoleRepository roleRepository,
-            UserRepository  userRepository,
-            PasswordEncoder passwordEncoder
-    ) {
+    public AdminSeeder(RoleRepository roleRepository, UserRepository  userRepository, PasswordEncoder passwordEncoder) {
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -32,7 +26,6 @@ public class AdminSeeder implements ApplicationListener<ContextRefreshedEvent> {
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         this.createSuperAdministrator();
-        this.createUser();
     }
 
     private void createSuperAdministrator() {
@@ -54,31 +47,6 @@ public class AdminSeeder implements ApplicationListener<ContextRefreshedEvent> {
         user.setLastname(superAdmin.getLastname());
         user.setEmail(superAdmin.getEmail());
         user.setPassword(passwordEncoder.encode(superAdmin.getPassword()));
-        user.setRole(optionalRole.get());
-
-        userRepository.save(user);
-    }
-
-
-    private void createUser() {
-        User userNormal = new User();
-        userNormal.setName("User");
-        userNormal.setLastname("Apellido");
-        userNormal.setEmail("user.apellido@gmail.com");
-        userNormal.setPassword("user123");
-
-        Optional<Role> optionalRole = roleRepository.findByName(RoleEnum.USER); //Aquí indica el tipo de Usuario
-        Optional<User> optionalUser = userRepository.findByEmail(userNormal.getEmail());
-
-        if (optionalRole.isEmpty() || optionalUser.isPresent()) {
-            return;
-        }
-
-        var user = new User();
-        user.setName(userNormal.getName());
-        user.setLastname(userNormal.getLastname());
-        user.setEmail(userNormal.getEmail());
-        user.setPassword(passwordEncoder.encode(userNormal.getPassword()));
         user.setRole(optionalRole.get());
 
         userRepository.save(user);
