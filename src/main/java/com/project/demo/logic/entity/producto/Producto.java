@@ -20,7 +20,6 @@ public class Producto {
     @JoinColumn(name = "categoria")
     private Categoria categoria;
 
-
     public Long getId() {
         return id;
     }
@@ -49,7 +48,7 @@ public class Producto {
         return precio;
     }
 
-    public void setPrecio(double precio) {
+    public void setPrecio(Double precio) {
         this.precio = precio;
     }
 
@@ -69,3 +68,5 @@ public class Producto {
         this.categoria = categoria;
     }
 }
+
+

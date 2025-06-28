@@ -3,12 +3,17 @@ package com.project.demo.rest.categoria;
 import com.project.demo.logic.entity.categoria.Categoria;
 import com.project.demo.logic.entity.categoria.CategoriaRepository;
 import com.project.demo.logic.entity.http.GlobalResponseHandler;
+import com.project.demo.logic.entity.http.Meta;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Pageable;
+
 import java.util.Optional;
 
 @RestController
@@ -19,11 +24,22 @@ public class CategoriaRestController {
     private CategoriaRepository categoriaRepository;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'USER')")
-    public ResponseEntity<?> getAllCategories(HttpServletRequest request) {
-        return new GlobalResponseHandler().handleResponse("Categorías guardadas: ",
-                categoriaRepository.findAll(), HttpStatus.OK, request
-        );
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getAllCategorias(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            HttpServletRequest request) {
+
+        Pageable pageable = PageRequest.of(page -1, size);
+        Page<Categoria> categoriaPage = categoriaRepository.findAll(pageable);
+
+        Meta meta = new Meta(request.getMethod(), request.getRequestURL().toString());
+        meta.setTotalPages(categoriaPage.getTotalPages());
+        meta.setTotalElements(categoriaPage.getTotalElements());
+        meta.setPageNumber(categoriaPage.getNumber() + 1);
+        meta.setPageSize(categoriaPage.getSize());
+
+        return new GlobalResponseHandler().handleResponse("Categorias encontradas", categoriaPage.getContent(), HttpStatus.OK, meta);
     }
 
     @PutMapping("/{categoriaId}")

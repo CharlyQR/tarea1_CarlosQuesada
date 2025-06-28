@@ -2,14 +2,19 @@ package com.project.demo.rest.producto;
 
 import com.project.demo.logic.entity.categoria.CategoriaRepository;
 import com.project.demo.logic.entity.http.GlobalResponseHandler;
+import com.project.demo.logic.entity.http.Meta;
 import com.project.demo.logic.entity.producto.Producto;
 import com.project.demo.logic.entity.producto.ProductoRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Pageable;
+
 
 import java.util.Optional;
 
@@ -24,12 +29,22 @@ public class ProductoRestController {
 
 
     @GetMapping
-    public ResponseEntity<?> getAllProducts(HttpServletRequest request) {
-        return new GlobalResponseHandler().handleResponse(
-                "Productos Guardados: ",
-                productoRepository.findAll(),
-                HttpStatus.OK, request
-        );
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getAllProductos(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            HttpServletRequest request) {
+
+        Pageable pageable = PageRequest.of(page -1, size);
+        Page<Producto> productosPage = productoRepository.findAll(pageable);
+
+        Meta meta = new Meta(request.getMethod(),  request.getRequestURL().toString());
+        meta.setTotalPages(productosPage.getTotalPages());
+        meta.setTotalElements(productosPage.getTotalElements());
+        meta.setPageNumber(productosPage.getNumber() + 1);
+        meta.setPageSize(productosPage.getSize());
+
+        return new GlobalResponseHandler().handleResponse("Productos encontrados", productosPage.getContent(), HttpStatus.OK, meta);
     }
 
     @PutMapping("/{productoId}")
